@@ -5,7 +5,7 @@ from collections import deque
 
 
 class NStepSarsaAgent:
-	def __init__(self, actions, n=1, alpha=0.1, gamma=0.99, epsilon=0.1, episodes=500):
+	def __init__(self, actions, n=1, alpha=0.1, gamma=0.99, epsilon=0.1, episodes=500, init_q=0.0):
 		"""
 		actions: lista de acciones posibles
 		n: número de pasos (n=1 es SARSA estándar)
@@ -13,6 +13,7 @@ class NStepSarsaAgent:
 		gamma: factor de descuento
 		epsilon: tasa de exploración
 		episodes: número de episodios de entrenamiento
+		init_q: valor inicial de Q
 		"""
 		self.actions = actions
 		self.n = n
@@ -21,10 +22,11 @@ class NStepSarsaAgent:
 		self.epsilon = epsilon
 		self.episodes = episodes
 		self.Q = dict()
+		self.init_q = init_q
 
 
 	def get_Q(self, state, action):
-		return self.Q.get((state, action), 0.0)
+		return self.Q.get((state, action), self.init_q)
 
 
 	def choose_action(self, state):
@@ -36,8 +38,9 @@ class NStepSarsaAgent:
 		return random.choice(max_actions)
 
 
-	def learn(self, env):
+	def learn(self, env, return_lengths=False):
 		rewards_per_episode = []
+		lengths_per_episode = []
 		for ep in range(self.episodes):
 			state = env.reset()
 			action = self.choose_action(state)
@@ -47,12 +50,14 @@ class NStepSarsaAgent:
 			T = float('inf')
 			t = 0
 			total_reward = 0
+			steps = 0
 			while True:
 				if t < T:
 					next_state, reward, done = env.step(actions[-1])
 					states.append(next_state)
 					rewards.append(reward)
 					total_reward += reward
+					steps += 1
 					if done:
 						T = t + 1
 					else:
@@ -71,6 +76,9 @@ class NStepSarsaAgent:
 					break
 				t += 1
 			rewards_per_episode.append(total_reward)
+			lengths_per_episode.append(steps)
+		if return_lengths:
+			return rewards_per_episode, lengths_per_episode
 		return rewards_per_episode
 
 
