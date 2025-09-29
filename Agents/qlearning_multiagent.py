@@ -9,12 +9,10 @@ class CentralizedAgent:
 
     def learn(self, env, run_num=None):
         lengths = []
-        total_rewards = []
         for ep in range(self.episodes):
             state = env.reset()
             done = False
             steps = 0
-            episode_reward = 0
             while not done:
                 action = self.agent.choose_action(state)
                 next_state, reward, done = env.step(action)
@@ -27,16 +25,15 @@ class CentralizedAgent:
 
                 state = next_state
                 steps += 1
-                episode_reward += reward
             lengths.append(steps)
-            total_rewards.append(episode_reward)
 
         if run_num is not None:
             recent_avg_length = np.mean(lengths[-100:]) if len(lengths) >= 100 else np.mean(lengths)
-            recent_avg_reward = np.mean(total_rewards[-100:]) if len(total_rewards) >= 100 else np.mean(total_rewards)
-            print(f"  Run {run_num} - Largo promedio últimos 100 episodios: {recent_avg_length:.2f}, Recompensa promedio: {recent_avg_reward:.2f}")
+            convergence_std = np.std(lengths[-100:]) if len(lengths) >= 100 else np.std(lengths)
+            min_length = np.min(lengths[-100:]) if len(lengths) >= 100 else np.min(lengths)
+            print(f"  Run {run_num} - Largo promedio últimos 100: {recent_avg_length:.2f}, Mín últimos 100: {min_length}, Convergencia (std): {convergence_std:.2f}")
 
-        return lengths, total_rewards
+        return lengths
 
 
 class DecentralizedAgent:
@@ -51,13 +48,11 @@ class DecentralizedAgent:
 
     def learn(self, env, run_num=None):
         lengths = []
-        agent_rewards = [[] for _ in range(self.num_agents)]
 
         for ep in range(self.episodes):
             state = env.reset()
             done = False
             steps = 0
-            episode_rewards = [0] * self.num_agents
 
             while not done:
                 actions = []
@@ -74,20 +69,16 @@ class DecentralizedAgent:
                     max_next_q = max(next_qs) if next_qs else 0.0
                     new_q = old_q + agent.alpha * (rewards[i] + agent.gamma * max_next_q - old_q)
                     agent.Q[(state, actions[i])] = new_q
-                    episode_rewards[i] += rewards[i]
 
                 state = next_state
                 steps += 1
 
             lengths.append(steps)
-            for i in range(self.num_agents):
-                agent_rewards[i].append(episode_rewards[i])
 
         if run_num is not None:
             recent_avg_length = np.mean(lengths[-100:]) if len(lengths) >= 100 else np.mean(lengths)
-            print(f"  Run {run_num} - Largo promedio últimos 100 episodios: {recent_avg_length:.2f}")
-            for i in range(self.num_agents):
-                recent_avg_reward = np.mean(agent_rewards[i][-100:]) if len(agent_rewards[i]) >= 100 else np.mean(agent_rewards[i])
-                print(f"    Agente {i+1} - Recompensa promedio últimos 100 episodios: {recent_avg_reward:.2f}")
+            convergence_std = np.std(lengths[-100:]) if len(lengths) >= 100 else np.std(lengths)
+            min_length = np.min(lengths[-100:]) if len(lengths) >= 100 else np.min(lengths)
+            print(f"  Run {run_num} - Largo promedio últimos 100: {recent_avg_length:.2f}, Mín últimos 100: {min_length}, Convergencia (std): {convergence_std:.2f}")
 
-        return lengths, agent_rewards
+        return lengths
