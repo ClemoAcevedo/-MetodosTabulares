@@ -1,4 +1,5 @@
 from Environments.MultiAgentEnvs.HunterAndPreyEnv import HunterAndPreyEnv
+from Environments.MultiAgentEnvs.CompetitiveHunterAndPreyEnv import CompetitiveHunterAndPreyEnv
 from Environments.MultiAgentEnvs.CentralizedHunterEnv import CentralizedHunterEnv
 from Environments.MultiAgentEnvs.HunterEnv import HunterEnv
 from MainSimpleEnvs import show, get_action_from_user
@@ -129,7 +130,7 @@ def run_decentralized_competitive_experiment():
 
     print(f"Configuración: {runs} runs, {episodes} episodios, γ={gamma}, α={alpha}, ε={epsilon}, Q_init={init_q}")
 
-    env = HunterAndPreyEnv()
+    env = CompetitiveHunterAndPreyEnv()
     agent_kwargs = {
         'num_agents': env.num_of_agents,
         'single_agent_actions': env.single_agent_action_space,
@@ -141,7 +142,7 @@ def run_decentralized_competitive_experiment():
     }
 
     avg_lengths, lengths_per_run = run_multiagent_experiment(
-        HunterAndPreyEnv, DecentralizedAgent, agent_kwargs, runs
+        CompetitiveHunterAndPreyEnv, DecentralizedAgent, agent_kwargs, runs
     )
 
     print(f"\nResultados Decentralized Competitive:")
@@ -152,6 +153,7 @@ def run_decentralized_competitive_experiment():
 
 
 def run_all_multiagent_experiments():
+    print("="*80)
     print("EJECUTANDO TODOS LOS EXPERIMENTOS MULTI-AGENTE")
     print("="*80)
 

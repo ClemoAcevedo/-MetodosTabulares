@@ -24,7 +24,7 @@ class CentralizedHunterEnv(AbstractMultiAgentEnv):
 
     def step(self, action):
         state, reward, done = self.env.step(action)
-        reward = reward[0]  # In this setting, the rewards are identical, so we only consider one of them
+        reward = reward[0]
         return state, reward, done
 
     def show(self):

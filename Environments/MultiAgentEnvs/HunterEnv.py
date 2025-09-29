@@ -31,7 +31,7 @@ class HunterEnv(AbstractMultiAgentEnv):
         prey_action = self.__sample_prey_action()
         hunter1_action, hunter2_action = action
         self.__state, reward, done = self.env.step((hunter1_action, hunter2_action, prey_action))
-        reward = reward[:2]  # we ignore the prey's reward
+        reward = reward[:2]
         return self.__state, reward, done
 
     def __sample_prey_action(self):
